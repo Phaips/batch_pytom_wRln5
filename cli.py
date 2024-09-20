@@ -214,11 +214,9 @@ def process_tomograms():
     if not confirm_prompt("Are these values correct for the first tomogram?"):
         return
  
-    # Proceed to get pytom parameters and slurm settings after the sanity check
     args = get_pytom_flags()
     slurm_args = get_slurm_settings()
  
-    # Process remaining tomograms
     for tomo_num in tomo_numbers:
         star_file = os.path.join(star_dir, f"{star_identifier}{tomo_num}.star")
         tomogram_file = os.path.join(tomogram_dir, f"{tomogram_identifier}{tomo_num}.mrc")
