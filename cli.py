@@ -225,10 +225,25 @@ def process_tomograms():
         output_dir = os.path.join(os.getcwd(), f"submission/tomo_{tomo_num}")
         os.makedirs(output_dir, exist_ok=True)
         temp_tilt_file, temp_defocus_file, temp_exposure_file = create_temp_files(tomo_num, tilt_angles, defocus_values, exposures, output_dir)
+
  
+        script_path = create_sbatch_script(tomo_num, temp_tilt_file, temp_defocus_file, temp_exposure_file, tomogram_file, None, output_dir, args, slurm_args)
     
+
+        def submit_sbatch(script_path):
+            try:
+                result = subprocess.run(['sbatch', script_path], capture_output=True, text=True)
+                if result.returncode == 0:
+                    print(f"Submission successful for {script_path}: {result.stdout}")
+                else:
+                    print(f"Error submitting {script_path}: {result.stderr}")
+            except Exception as e:
+                print(f"Exception occurred while submitting {script_path}: {str(e)}")
+
+        submit_sbatch(script_path)
+
  
-    print("All specified tomograms have been processed and sbatch scripts have been generated.")
+    print("All specified tomograms have been processe, sbatch scripts have been generated and submitted.")
  
  
 if __name__ == "__main__":
