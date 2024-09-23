@@ -204,7 +204,8 @@ def process_tomograms():
     star_file = os.path.join(star_dir, f"{star_identifier}{first_tomo_num}.star")
     tomogram_file = os.path.join(tomogram_dir, f"{tomogram_identifier}{first_tomo_num}.mrc")
     tilt_angles, defocus_values, exposures = read_star_file(star_file)
- 
+    
+    # First and last values displayed.. maybe all the values? or display the entire shell script for user confirmation? 
     print("\nSanity Check for your First Tomogram checking Min and Max values")
     print(f"Tilt values: [{round(tilt_angles[0])}, {round(tilt_angles[-1])}]")
     print(f"Defocus values: [{round(defocus_values[0])}, {round(defocus_values[-1])}]")
