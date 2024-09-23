@@ -19,7 +19,7 @@ def get_user_input(message, default=None):
 def read_star_file(file_path):
     df = starfile.read(file_path)
     tilt_angles = df["rlnTomoNominalStageTiltAngle"].tolist()
-    defocus_values = ((df["rlnDefocusU"] + df["rlnDefocusV"]) / 20000).tolist()  # Convert defocus to micrometers
+    defocus_values = ((df["rlnDefocusU"] + df["rlnDefocusV"]) / 20000).tolist()  # Convert defocus to micrometers and take average between DeofcusU and DefocusV
     exposures = df["rlnMicrographPreExposure"].tolist()
     return tilt_angles, defocus_values, exposures
  
