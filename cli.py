@@ -226,7 +226,7 @@ def process_tomograms():
         os.makedirs(output_dir, exist_ok=True)
         temp_tilt_file, temp_defocus_file, temp_exposure_file = create_temp_files(tomo_num, tilt_angles, defocus_values, exposures, output_dir)
  
-        create_sbatch_script(tomo_num, temp_tilt_file, temp_defocus_file, temp_exposure_file, tomogram_file, None, output_dir, args, slurm_args)
+    
  
     print("All specified tomograms have been processed and sbatch scripts have been generated.")
  
