@@ -43,4 +43,5 @@ grams**
 > 
 > Enter the template file path (Required): []:
 
-Empty = ENTER
+Bold = Inputs
+Empty = ENTER (default)
