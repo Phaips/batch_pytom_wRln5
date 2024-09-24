@@ -24,17 +24,17 @@ grams**
 > 
 > Enter the identifier (file base name) for tomogram files (default: rec_Position_): []:
 >
->**Sanity Check for your First Tomogram checking Min and Max values
+> **Sanity Check for your First Tomogram checking Min and Max values**
 > 
-> Tilt values: [-40.01, 57.99]
+> **Tilt values: [-40.01, 57.99]**
 > 
-> Defocus values: [1.36, 2.03]
+> **Defocus values: [1.36, 2.03]**
 > 
-> Exposure values: [100.0, 96.0]
+> **Exposure values: [100.0, 96.0]**
 > 
-> .star File: ../chlorella/Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star
+> **.star File: ../chlorella/Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star**
 > 
-> .mrc File: ../chlorella/Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc**
+> **.mrc File: ../chlorella/Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc**
 > 
 > Are these values correct for the first tomogram? ([y]es/ [n]o): **y**
 >
