@@ -102,7 +102,7 @@ Example:
 >
 > _time: 06:00:00_
 > 
-> Do you want to use the default SLURM settings? ([y]es/ [n]o): **y**
+> Do you want to use the default SLURM settings? (No = provide custom inputs). ([y]es/ [n]o): **y**
 
 
 Bold = Inputs
