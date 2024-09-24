@@ -39,7 +39,71 @@ Example:
 > 
 >--- Pytom Parameters ---
 > 
-> Enter the template file path (Required): []:
+> Enter the template file path (Required): []: **tmpl.mrc**
+>
+> Enter the mask file path (Required): []: **mask.mrc**
+>
+> Enter particle diameter in Angstrom or leave empty to specify angular search value (either one required): []: **140**
+>
+> Enter voxel size in Angstrom (Required): []: **7.92**
+>
+> Enter GPU IDs (Required): []: **0**
+>
+> Enable random-phase correction? (recommended) ([y]es/ [n]o): **y**
+>
+> Enter random seed (default: 69): [69]:
+>
+> Enable per-tilt-weighting? ([y]es/ [n]o): **y**
+>
+> Do you want to use tomogram masks? ([y]es/ [n]o): **y**
+>
+> Enter the directory for tomogram masks (e.g. path/to/bmask_*.mrc): []: **../bmask**
+>
+> Enable non-spherical mask? ([y]es/ [n]o): **n**
+>
+> Enable spectral whitening? ([y]es/ [n]o): **n**
+>
+> Enter z-axis rotational symmetry as integer (PRESS ENTER TO SKIP): []: **4**
+>
+> Amplitude contrast (ENTER = default: 0.07): [0.07]:
+>
+> Spherical aberration in mm (ENTER = default: 2.7): [2.7]:
+>
+> Acceleration voltage in kV (ENTER = default: 300): [300]:
+>
+> Low-pass filter (PRESS ENTER TO SKIP): []:
+>
+> High-pass filter (PRESS ENTER TO SKIP): []:
+>
+> Phase shift (PRESS ENTER TO SKIP): []:
+>
+> 
+> _--- SLURM Settings ---_
+> 
+> _Default SLURM settings are:_
+> 
+> _partition: rtx3090-em_
+> 
+> _ntasks: 1_
+> 
+> _nodes: 1_
+> 
+> _ntasks_per_node: 1_
+>
+> _cpus_per_task: 4_
+> 
+> _gres: gpu:1_
+> 
+> _mail_type: none_
+> 
+> _mem: 128_
+> 
+> _qos: emgpu_
+>
+> _time: 06:00:00_
+> 
+> Do you want to use the default SLURM settings? ([y]es/ [n]o): **y**
+
 
 Bold = Inputs
 
