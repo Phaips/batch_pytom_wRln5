@@ -14,13 +14,11 @@ Example:
 > 
 > Is the list of tomograms correct? ([y]es/ [n]o): **y**
 > 
-> Enter the directory path for RELION5 tilt-series.star files []: **../chlorella/Tomograms/No_halfset_tomo_aretomo/til
-t_series**
+> Enter the directory path for RELION5 tilt-series.star files []: **../chlorella/Tomograms/No_halfset_tomo_aretomo/tilt_series**
 > 
 > Enter the identifier (file base name) for tilt-series.star files (default: Position_): []:
 > 
-> Enter the directory path for RELION5 tomogram files (.mrc) []: **../chlorella/Tomograms/No_halfset_tomo_aretomo/tomo
-grams**
+> Enter the directory path for RELION5 tomogram files (.mrc) []: **../chlorella/Tomograms/No_halfset_tomo_aretomo/tomograms**
 > 
 > Enter the identifier (file base name) for tomogram files (default: rec_Position_): []:
 >
