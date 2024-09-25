@@ -179,9 +179,10 @@ def get_slurm_settings():
 
 def find_files_with_exact_number(directory, tomo_num, extension):
     """
-    Use regex to find files in a directory that end with the given tomo_num before the file extension.
+    Use regex to find files in a directory that have the given tomo_num before the file extension.
+    The number can be preceded by an underscore or other non-numeric characters.
     """
-    pattern = re.compile(rf".*_{tomo_num}\.{extension}$")
+    pattern = re.compile(rf".*[^\d]{tomo_num}\.{extension}$")
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
     matched_files = [f for f in files if pattern.match(f)]
     return matched_files
@@ -192,7 +193,7 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     """
     star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
     mrc_files = find_files_with_exact_number(mrc_dir, tomo_num, 'mrc')
-    
+
     if not star_files or not mrc_files:
         raise FileNotFoundError(f"Could not find matching .star or .mrc file for tomogram {tomo_num}")
 
