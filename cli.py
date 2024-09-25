@@ -180,7 +180,7 @@ def get_slurm_settings():
 def find_files_with_exact_number(directory, tomo_num, extension):
     """
     Use regex to find files in a directory that have the given tomo_num before the file extension.
-    The number can be preceded by an underscore or other non-numeric characters.
+    The number can be preceded by an underscore or other non-numeric characters. Avoid 1, 11, 111 etc. confusion
     """
     pattern = re.compile(rf".*[^\d]{tomo_num}\.{extension}$")
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
