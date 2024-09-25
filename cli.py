@@ -180,8 +180,8 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     """
     Search for .star, .mrc, and optionally bmask_*.mrc files in the directories that match the given tomogram number.
     """
-    star_pattern = os.path.join(star_dir, f"*_{tomo_num}_.star")
-    mrc_pattern = os.path.join(mrc_dir, f"*_{tomo_num}_.mrc")
+    star_pattern = os.path.join(star_dir, f"*{tomo_num}.star")
+    mrc_pattern = os.path.join(mrc_dir, f"*{tomo_num}.mrc")
     
     star_files = glob.glob(star_pattern)
     mrc_files = glob.glob(mrc_pattern)
