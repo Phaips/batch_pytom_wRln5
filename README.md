@@ -1,6 +1,6 @@
 Batch submission of pytom-match-pick jobs using a tomolist. This is a text file contain each tomogram number per line which you want to run template matching on.
-After running the python script the user is prompted for this file as well as RELION5 directories containing tomograms_*.mrc and tilt-series.star files.
-Where * is the tomo number. Tilt values, defocus, and exposure values will be read from this .star file. 
+After running the python script the user is prompted for this file as well as RELION5 directories containing `*.mrc` and `*.star` files.
+Where `*` is the tomo number. Tilt values, defocus, and exposure values will be read from each `.star` file. 
 The user then proceeds to provide the usual pytom flags as input. Finally, a slurm submission batch script will be generated.
 The #SBATCH values can be adjusted accordingly for your HPC slurm configuration.
 
