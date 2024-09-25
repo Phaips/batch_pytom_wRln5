@@ -4,6 +4,7 @@ import starfile
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import PathCompleter
 import subprocess
+import re
 
 def confirm_prompt(message):
     while True:
@@ -176,15 +177,21 @@ def get_slurm_settings():
 
     return slurm_args
 
+def find_files_with_exact_number(directory, tomo_num, extension):
+    """
+    Use regex to find files in a directory that end with the given tomo_num before the file extension.
+    """
+    pattern = re.compile(rf".*_{tomo_num}\.{extension}$")
+    files = glob.glob(os.path.join(directory, f"*.{extension}"))
+    matched_files = [f for f in files if pattern.match(f)]
+    return matched_files
+
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
     """
     Search for .star, .mrc, and optionally bmask_*.mrc files in the directories that match the given tomogram number.
     """
-    star_pattern = os.path.join(star_dir, f"*{tomo_num}.star")
-    mrc_pattern = os.path.join(mrc_dir, f"*{tomo_num}.mrc")
-    
-    star_files = glob.glob(star_pattern)
-    mrc_files = glob.glob(mrc_pattern)
+    star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
+    mrc_files = find_files_with_exact_number(mrc_dir, tomo_num, 'mrc')
     
     if not star_files or not mrc_files:
         raise FileNotFoundError(f"Could not find matching .star or .mrc file for tomogram {tomo_num}")
@@ -194,8 +201,7 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     
     bmask_file = None
     if use_tomogram_mask and bmask_dir:
-        bmask_pattern = os.path.join(bmask_dir, f"*{tomo_num}.mrc")
-        bmask_files = glob.glob(bmask_pattern)
+        bmask_files = find_files_with_exact_number(bmask_dir, tomo_num, 'mrc')
         if bmask_files:
             bmask_file = bmask_files[0]  # Pick the first match
         else:
