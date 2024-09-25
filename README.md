@@ -16,11 +16,11 @@ Example:
 > 
 > Enter the directory path for RELION5 tilt-series.star files []: **../chlorella/Tomograms/No_halfset_tomo_aretomo/tilt_series**
 > 
-> Enter the identifier (file base name) for tilt-series.star files (default: Position_): []:
-> 
 > Enter the directory path for RELION5 tomogram files (.mrc) []: **../chlorella/Tomograms/No_halfset_tomo_aretomo/tomograms**
-> 
-> Enter the identifier (file base name) for tomogram files (default: rec_Position_): []:
+>
+> Do you want to use tomogram masks? ([y]es/ [n]o): **y**
+>
+> Enter the directory for tomogram masks (e.g. path/to/bmask_*.mrc): []: **../bmask**
 >
 > _Sanity Check for your First Tomogram checking Min and Max values_
 > 
@@ -54,10 +54,6 @@ Example:
 > Enter random seed (default: 69): [69]:
 >
 > Enable per-tilt-weighting? ([y]es/ [n]o): **y**
->
-> Do you want to use tomogram masks? ([y]es/ [n]o): **y**
->
-> Enter the directory for tomogram masks (e.g. path/to/bmask_*.mrc): []: **../bmask**
 >
 > Enable non-spherical mask? ([y]es/ [n]o): **n**
 >
