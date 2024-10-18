@@ -127,9 +127,6 @@ pytom_match_template.py \\
         if args.get('high_pass'):
             f.write(f"--high-pass {args['high_pass']} \\\n")
 
-        if args.get('phase_shift'):
-            f.write(f"--phase-shift {args['phase_shift']} \\\n")
-
     print(f"Generated sbatch script for tomogram {tomogram_num} at {script_path}")
     return script_path
 
@@ -191,7 +188,6 @@ def get_pytom_flags():
     args['voltage'] = get_user_input("Acceleration voltage in kV (ENTER = default: 300):", "300")
     args['low_pass'] = get_user_input("Low-pass filter (PRESS ENTER TO SKIP):")
     args['high_pass'] = get_user_input("High-pass filter (PRESS ENTER TO SKIP):")
-    args['phase_shift'] = get_user_input("Phase shift (PRESS ENTER TO SKIP):")
 
     return args
 
