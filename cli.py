@@ -290,6 +290,7 @@ def process_tomograms():
         print(f"Exposure values: [{round(exposures[0], 2)}, {round(exposures[-1], 2)}]")
         print(f".star File: {star_file}")
         print(f".mrc File: {tomogram_file}")
+        print(f"Bmask File: {bmask_file}")  # Add this line
         if not confirm_prompt("Are these values correct for the first tomogram?"):
             return
     except Exception as e:
