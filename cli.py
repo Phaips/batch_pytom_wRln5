@@ -8,11 +8,13 @@ import re
 
 def confirm_prompt(message):
     while True:
-        user_input = input(f"{message} ([y]es/ [n]o): ").lower()
+        user_input = input(f"{message} ([y]es/[n]o): ").lower()
         if user_input in ['y', 'yes']:
             return True
         elif user_input in ['n', 'no']:
             return False
+        else:
+            print("Please enter 'yes' or 'no'.")
 
 def get_user_input(message, default=None):
     completer = PathCompleter(expanduser=True)
@@ -20,11 +22,15 @@ def get_user_input(message, default=None):
     return user_input.strip() or default
 
 def read_star_file(file_path):
-    df = starfile.read(file_path)
-    tilt_angles = df["rlnTomoNominalStageTiltAngle"].tolist()
-    defocus_values = ((df["rlnDefocusU"] + df["rlnDefocusV"]) / 20000).tolist()  # Convert defocus to micrometers and take average between DefocusU and DefocusV
-    exposures = df["rlnMicrographPreExposure"].tolist()
-    return tilt_angles, defocus_values, exposures
+    try:
+        df = starfile.read(file_path)
+        tilt_angles = df["rlnTomoNominalStageTiltAngle"].tolist()
+        defocus_values = ((df["rlnDefocusU"] + df["rlnDefocusV"]) / 20000).tolist()  # Convert to micrometers
+        exposures = df["rlnMicrographPreExposure"].tolist()
+        return tilt_angles, defocus_values, exposures
+    except Exception as e:
+        print(f"Error reading STAR file {file_path}: {e}")
+        return [], [], []
 
 def create_temp_files(tomogram_num, tilt_angles, defocus_values, exposures, output_dir):
     temp_tilt_file = os.path.join(output_dir, f"{tomogram_num}.tlt")
@@ -51,7 +57,7 @@ def create_sbatch_script(tomogram_num, temp_tilt_file, temp_defocus_file, temp_e
         f.write(f"""#!/bin/bash -l
 
 #SBATCH -o pytom.out%j
-#SBATCH -D ./ 
+#SBATCH -D ./
 #SBATCH -J pytom_{tomogram_num}
 #SBATCH --partition={slurm_args['partition']}
 #SBATCH --ntasks={slurm_args['ntasks']}
@@ -85,10 +91,20 @@ pytom_match_template.py \\
         if args.get('use_tomogram_mask') and bmask_file:
             f.write(f"--tomogram-mask {bmask_file} \\\n")
 
+        if args.get('volume_split'):
+            f.write(f"-s {args['volume_split']} \\\n")
+
         f.write(f"--voxel-size-angstrom {args['voxel_size_angstrom']} \\\n")
-        f.write(f"-r \\\n")
-        f.write(f"--rng-seed {args['rng_seed']} \\\n")
-        f.write(f"-g {args['gpu_ids']} \\\n")
+
+        if args.get('random_phase_correction'):
+            f.write(f"-r \\\n")
+            f.write(f"--rng-seed {args['rng_seed']} \\\n")
+
+        if args.get('gpu_ids'):
+            f.write(f"-g {args['gpu_ids']} \\\n")
+        else:
+            f.write(f"-g 0 \\\n")  # Default GPU ID
+
         f.write(f"--amplitude-contrast {args['amplitude_contrast']} \\\n")
         f.write(f"--spherical-aberration {args['spherical_aberration']} \\\n")
         f.write(f"--voltage {args['voltage']} \\\n")
@@ -99,38 +115,77 @@ pytom_match_template.py \\
         if args.get('per_tilt_weighting'):
             f.write(f"--per-tilt-weighting \\\n")
 
+        if args.get('non_spherical_mask'):
+            f.write(f"--non-spherical-mask \\\n")
+
+        if args.get('spectral_whitening'):
+            f.write(f"--spectral-whitening \\\n")
+
+        if args.get('low_pass'):
+            f.write(f"--low-pass {args['low_pass']} \\\n")
+
+        if args.get('high_pass'):
+            f.write(f"--high-pass {args['high_pass']} \\\n")
+
+        if args.get('phase_shift'):
+            f.write(f"--phase-shift {args['phase_shift']} \\\n")
+
     print(f"Generated sbatch script for tomogram {tomogram_num} at {script_path}")
     return script_path
 
-
 def get_pytom_flags():
     args = {}
-    
+
     print("\n--- Pytom Parameters ---")
-    args['template'] = get_user_input("Enter the template file path (Required):")
-    args['mask'] = get_user_input("Enter the mask file path (Required):")
-    args['particle_diameter'] = get_user_input("Enter particle diameter in Angstrom or leave empty to specify angular search value (either one required):")
-    args['angular_search'] = get_user_input("Enter angular search (optional):") if not args['particle_diameter'] else None
+    # Required parameters
+    while True:
+        args['template'] = get_user_input("Enter the template file path (Required):")
+        if args['template'] and os.path.isfile(args['template']):
+            break
+        else:
+            print("Template file is required and must exist.")
+
+    while True:
+        args['mask'] = get_user_input("Enter the mask file path (Required):")
+        if args['mask'] and os.path.isfile(args['mask']):
+            break
+        else:
+            print("Mask file is required and must exist.")
+
+    # Particle diameter or angular search
+    args['particle_diameter'] = get_user_input("Enter particle diameter in Angstrom (Required if not specifying angular search):")
+    if not args['particle_diameter']:
+        args['angular_search'] = get_user_input("Enter angular search value or file path (Required if particle diameter not specified):")
+        while not args['angular_search']:
+            print("You must specify either particle diameter or angular search.")
+            args['angular_search'] = get_user_input("Enter angular search value or file path (Required):")
+
+    # Volume split parameters
+    args['volume_split'] = get_user_input("Enter volume split parameters as 'x y z' (e.g., 2 2 1) or leave empty to skip:")
+    if args['volume_split']:
+        # Validate the input
+        if not re.match(r'^\d+\s+\d+\s+\d+$', args['volume_split']):
+            print("Invalid volume split format. It should be three integers separated by spaces.")
+            args['volume_split'] = None
+
     args['voxel_size_angstrom'] = get_user_input("Enter voxel size in Angstrom (Required):")
     args['gpu_ids'] = get_user_input("Enter GPU IDs (Required):")
 
     if confirm_prompt("Enable random-phase correction? (recommended)"):
         args['random_phase_correction'] = True
+        args['rng_seed'] = get_user_input("Enter random seed (default: 69):", "69")
 
-    args['rng_seed'] = get_user_input("Enter random seed (default: 69):", "69")
-    
     if confirm_prompt("Enable per-tilt-weighting?"):
         args['per_tilt_weighting'] = True
 
     if confirm_prompt("Enable non-spherical mask?"):
-        args['non_spherical_mask'] = False
-    
+        args['non_spherical_mask'] = True
+
     if confirm_prompt("Enable spectral whitening?"):
-        args['spectral_whitening'] = False
+        args['spectral_whitening'] = True
 
     args['z_axis_rotational_symmetry'] = get_user_input("Enter z-axis rotational symmetry as integer (PRESS ENTER TO SKIP):")
-    
-    
+
     args['amplitude_contrast'] = get_user_input("Amplitude contrast (ENTER = default: 0.07):", "0.07")
     args['spherical_aberration'] = get_user_input("Spherical aberration in mm (ENTER = default: 2.7):", "2.7")
     args['voltage'] = get_user_input("Acceleration voltage in kV (ENTER = default: 300):", "300")
@@ -140,10 +195,9 @@ def get_pytom_flags():
 
     return args
 
-
 def get_slurm_settings():
     slurm_defaults = {
-        'partition': 'rtx3090-em',
+        'partition': 'rtx4090',   # Updated default partition
         'ntasks': '1',
         'nodes': '1',
         'ntasks_per_node': '1',
@@ -151,7 +205,7 @@ def get_slurm_settings():
         'gres': 'gpu:1',
         'mail_type': 'none',
         'mem': '128',
-        'qos': 'emgpu',
+        'qos': 'gpu6hours',       # Updated default QoS
         'time': '06:00:00'
     }
 
@@ -164,7 +218,7 @@ def get_slurm_settings():
         return slurm_defaults
 
     slurm_args = {}
-    slurm_args['partition'] = get_user_input("SLURM partition (default: rtx3090-em):", slurm_defaults['partition'])
+    slurm_args['partition'] = get_user_input("SLURM partition (default: rtx4090):", slurm_defaults['partition'])
     slurm_args['ntasks'] = get_user_input("Number of tasks (default: 1):", slurm_defaults['ntasks'])
     slurm_args['nodes'] = get_user_input("Number of nodes (default: 1):", slurm_defaults['nodes'])
     slurm_args['ntasks_per_node'] = get_user_input("Tasks per node (default: 1):", slurm_defaults['ntasks_per_node'])
@@ -172,25 +226,18 @@ def get_slurm_settings():
     slurm_args['gres'] = get_user_input("GPU resources (default: gpu:1):", slurm_defaults['gres'])
     slurm_args['mail_type'] = get_user_input("Mail type for SLURM (default: none):", slurm_defaults['mail_type'])
     slurm_args['mem'] = get_user_input("Memory allocation in GB (default: 128):", slurm_defaults['mem'])
-    slurm_args['qos'] = get_user_input("QoS for SLURM (default: emgpu):", slurm_defaults['qos'])
+    slurm_args['qos'] = get_user_input("QoS for SLURM (default: gpu6hours):", slurm_defaults['qos'])
     slurm_args['time'] = get_user_input("Time limit (default: 06:00:00):", slurm_defaults['time'])
 
     return slurm_args
 
 def find_files_with_exact_number(directory, tomo_num, extension):
-    """
-    Use regex to find files in a directory that have the given tomo_num before the file extension.
-    The number can be preceded by an underscore or other non-numeric characters. Avoid 1, 11, 111 etc. confusion
-    """
     pattern = re.compile(rf".*[^\d]{tomo_num}\.{extension}$")
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
     matched_files = [f for f in files if pattern.match(f)]
     return matched_files
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
-    """
-    Search for .star, .mrc, and optionally bmask_*.mrc files in the directories that match the given tomogram number.
-    """
     star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
     mrc_files = find_files_with_exact_number(mrc_dir, tomo_num, 'mrc')
 
@@ -210,9 +257,12 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     
     return star_files[0], mrc_files[0], bmask_file
 
-
 def process_tomograms():
     tomolist_file = get_user_input("Enter the path to the tomolist file")
+    if not tomolist_file or not os.path.isfile(tomolist_file):
+        print("Tomolist file is required and must exist.")
+        return
+
     with open(tomolist_file, 'r') as f:
         tomo_numbers = [line.strip() for line in f if line.strip().isdigit()]
     
@@ -226,44 +276,44 @@ def process_tomograms():
     use_tomogram_mask = confirm_prompt("Do you want to use tomogram masks?")
     bmask_dir = None
     if use_tomogram_mask:
-        bmask_dir = get_user_input("Enter the directory for tomogram masks (e.g. path/to/bmask_*.mrc):")
+        bmask_dir = get_user_input("Enter the directory for tomogram masks (e.g., path/to/bmask_*.mrc):")
 
+    # Validate the first tomogram for sanity check
     first_tomo_num = tomo_numbers[0]
-    star_file, tomogram_file, bmask_file = find_matching_files(first_tomo_num, star_dir, mrc_dir, bmask_dir, use_tomogram_mask)
+    try:
+        star_file, tomogram_file, bmask_file = find_matching_files(first_tomo_num, star_dir, mrc_dir, bmask_dir, use_tomogram_mask)
+        tilt_angles, defocus_values, exposures = read_star_file(star_file)
 
-    tilt_angles, defocus_values, exposures = read_star_file(star_file)
-
-    print("\nSanity Check for your First Tomogram checking Min and Max values")
-    print(f"Tilt values: [{round(tilt_angles[0], 2)}, {round(tilt_angles[-1], 2)}]")
-    print(f"Defocus values: [{round(defocus_values[0], 2)}, {round(defocus_values[-1], 2)}]")
-    print(f"Exposure values: [{round(exposures[0], 2)}, {round(exposures[-1], 2)}]")
-    print(f".star File: {star_file}")
-    print(f".mrc File: {tomogram_file}")
-    if not confirm_prompt("Are these values correct for the first tomogram?"):
+        print("\nSanity Check for your First Tomogram checking Min and Max values")
+        print(f"Tilt values: [{round(tilt_angles[0], 2)}, {round(tilt_angles[-1], 2)}]")
+        print(f"Defocus values: [{round(defocus_values[0], 2)}, {round(defocus_values[-1], 2)}]")
+        print(f"Exposure values: [{round(exposures[0], 2)}, {round(exposures[-1], 2)}]")
+        print(f".star File: {star_file}")
+        print(f".mrc File: {tomogram_file}")
+        if not confirm_prompt("Are these values correct for the first tomogram?"):
+            return
+    except Exception as e:
+        print(f"Error during sanity check: {e}")
         return
 
     args = get_pytom_flags()
+    args['use_tomogram_mask'] = use_tomogram_mask
     slurm_args = get_slurm_settings()
 
     for tomo_num in tomo_numbers:
         try:
             star_file, tomogram_file, bmask_file = find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir, use_tomogram_mask)
-        except FileNotFoundError as e:
-            print(f"Skipping tomogram {tomo_num}: {str(e)}")
+            tilt_angles, defocus_values, exposures = read_star_file(star_file)
+            output_dir = os.path.join(os.getcwd(), f"submission/tomo_{tomo_num}")
+            os.makedirs(output_dir, exist_ok=True)
+            temp_tilt_file, temp_defocus_file, temp_exposure_file = create_temp_files(tomo_num, tilt_angles, defocus_values, exposures, output_dir)
+            script_path = create_sbatch_script(tomo_num, temp_tilt_file, temp_defocus_file, temp_exposure_file, tomogram_file, bmask_file, output_dir, args, slurm_args)
+            submit_sbatch(script_path)
+        except Exception as e:
+            print(f"Skipping tomogram {tomo_num} due to error: {e}")
             continue
 
-        tilt_angles, defocus_values, exposures = read_star_file(star_file)
-
-        output_dir = os.path.join(os.getcwd(), f"submission/tomo_{tomo_num}")
-        os.makedirs(output_dir, exist_ok=True)
-        temp_tilt_file, temp_defocus_file, temp_exposure_file = create_temp_files(tomo_num, tilt_angles, defocus_values, exposures, output_dir)
-
-        script_path = create_sbatch_script(tomo_num, temp_tilt_file, temp_defocus_file, temp_exposure_file, tomogram_file, bmask_file, output_dir, args, slurm_args)
-
-        submit_sbatch(script_path)
-
     print("All specified tomograms have been processed, sbatch scripts have been generated and submitted.")
-
 
 def submit_sbatch(script_path):
     try:
