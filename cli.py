@@ -114,6 +114,8 @@ pytom_match_template.py \\
 
         if args.get('per_tilt_weighting'):
             f.write(f"--per-tilt-weighting \\\n")
+            f.write(f"--tomogram-ctf-model phase-flip \\\n")
+
 
         if args.get('non_spherical_mask'):
             f.write(f"--non-spherical-mask \\\n")
