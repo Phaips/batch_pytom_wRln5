@@ -36,17 +36,17 @@ Do you want to use tomogram masks? ([y]es/[n]o): **y**
 
 Enter the directory for tomogram masks (e.g., path/to/bmask_*.mrc): []: **../bmask**
 
-_Sanity Check for your First Tomogram checking Min and Max values_
+*Sanity Check for your First Tomogram checking Min and Max values*
 
-_Tilt values: [-40.01, 57.99]_
+*Tilt values: [-40.01, 57.99]*
 
-_Defocus values: [1.36, 2.03]_
+*Defocus values: [1.36, 2.03]*
 
-_Exposure values: [100.0, 96.0]_
+*Exposure values: [100.0, 96.0]*
 
-_.star File: ../Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star_
+*.star File: ../Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star*
 
-_.mrc File: ../Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc_
+*.mrc File: ../Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc*
 
 Are these values correct for the first tomogram? ([y]es/[n]o): **y**
 
@@ -80,13 +80,13 @@ Spherical aberration in mm (ENTER = default: 2.7): [2.7]: **2.7**
 
 Acceleration voltage in kV (ENTER = default: 300): [300]: **300**
 
-Low-pass filter (PRESS ENTER TO SKIP): []: 
+Low-pass filter (PRESS ENTER TO SKIP): []:
 
-High-pass filter (PRESS ENTER TO SKIP): []: 
+High-pass filter (PRESS ENTER TO SKIP): []:
 
 --- SLURM Settings ---
 
-_Default SLURM settings are:_
+Default SLURM settings are:
 
 - partition: rtx4090
 - ntasks: 1
