@@ -116,7 +116,6 @@ pytom_match_template.py \\
             f.write(f"--per-tilt-weighting \\\n")
             f.write(f"--tomogram-ctf-model phase-flip \\\n")
 
-
         if args.get('non_spherical_mask'):
             f.write(f"--non-spherical-mask \\\n")
 
@@ -229,15 +228,24 @@ def get_slurm_settings():
 
     return slurm_args
 
-def find_files_with_exact_number(directory, tomo_num, extension):
-    pattern = re.compile(rf".*[^\d]{tomo_num}\.{extension}$")
-    files = glob.glob(os.path.join(directory, f"*.{extension}"))
-    matched_files = [f for f in files if pattern.match(f)]
+def find_files_with_tomo_number(directory, tomo_num, extension):
+    files = glob.glob(os.path.join(directory, f'*.{extension}'))
+    matched_files = []
+    for f in files:
+        filename = os.path.basename(f)
+        name_without_ext = os.path.splitext(filename)[0]
+        segments = name_without_ext.split('_')
+        for idx, segment in enumerate(segments):
+            if segment == tomo_num:
+                # Exclude if preceding segment is a digit
+                if idx == 0 or not segments[idx - 1].isdigit():
+                    matched_files.append(f)
+                break  # Stop after finding the first match
     return matched_files
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
-    star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
-    mrc_files = find_files_with_exact_number(mrc_dir, tomo_num, 'mrc')
+    star_files = find_files_with_tomo_number(star_dir, tomo_num, 'star')
+    mrc_files = find_files_with_tomo_number(mrc_dir, tomo_num, 'mrc')
 
     if not star_files or not mrc_files:
         raise FileNotFoundError(f"Could not find matching .star or .mrc file for tomogram {tomo_num}")
@@ -247,7 +255,7 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     
     bmask_file = None
     if use_tomogram_mask and bmask_dir:
-        bmask_files = find_files_with_exact_number(bmask_dir, tomo_num, 'mrc')
+        bmask_files = find_files_with_tomo_number(bmask_dir, tomo_num, 'mrc')
         if bmask_files:
             bmask_file = bmask_files[0]  # Pick the first match
         else:
@@ -262,8 +270,8 @@ def process_tomograms():
         return
 
     with open(tomolist_file, 'r') as f:
-        tomo_numbers = [line.strip() for line in f if line.strip().isdigit()]
-    
+        tomo_numbers = [line.strip() for line in f if line.strip()]
+
     print(f"Tomogram numbers: {tomo_numbers}")
     if not confirm_prompt("Is the list of tomograms correct?"):
         return
@@ -288,7 +296,7 @@ def process_tomograms():
         print(f"Exposure values: [{round(exposures[0], 2)}, {round(exposures[-1], 2)}]")
         print(f".star File: {star_file}")
         print(f".mrc File: {tomogram_file}")
-        print(f"Bmask File: {bmask_file}")  # Add this line
+        print(f"Bmask File: {bmask_file}")
         if not confirm_prompt("Are these values correct for the first tomogram?"):
             return
     except Exception as e:
