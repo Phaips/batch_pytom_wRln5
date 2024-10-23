@@ -228,24 +228,20 @@ def get_slurm_settings():
 
     return slurm_args
 
-def find_files_with_tomo_number(directory, tomo_num, extension):
-    files = glob.glob(os.path.join(directory, f'*.{extension}'))
+def find_files_matching_tomo_num(directory, tomo_num, extension):
+    files = glob.glob(os.path.join(directory, f"*.{extension}"))
     matched_files = []
     for f in files:
-        filename = os.path.basename(f)
-        name_without_ext = os.path.splitext(filename)[0]
-        segments = name_without_ext.split('_')
-        for idx, segment in enumerate(segments):
-            if segment == tomo_num:
-                # Exclude if preceding segment is a digit
-                if idx == 0 or not segments[idx - 1].isdigit():
-                    matched_files.append(f)
-                break  # Stop after finding the first match
+        filename = os.path.splitext(os.path.basename(f))[0]
+        if filename == tomo_num:
+            matched_files.append(f)
+        elif filename.endswith('_' + tomo_num):
+            matched_files.append(f)
     return matched_files
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
-    star_files = find_files_with_tomo_number(star_dir, tomo_num, 'star')
-    mrc_files = find_files_with_tomo_number(mrc_dir, tomo_num, 'mrc')
+    star_files = find_files_matching_tomo_num(star_dir, tomo_num, 'star')
+    mrc_files = find_files_matching_tomo_num(mrc_dir, tomo_num, 'mrc')
 
     if not star_files or not mrc_files:
         raise FileNotFoundError(f"Could not find matching .star or .mrc file for tomogram {tomo_num}")
@@ -255,7 +251,7 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     
     bmask_file = None
     if use_tomogram_mask and bmask_dir:
-        bmask_files = find_files_with_tomo_number(bmask_dir, tomo_num, 'mrc')
+        bmask_files = find_files_matching_tomo_num(bmask_dir, tomo_num, 'mrc')
         if bmask_files:
             bmask_file = bmask_files[0]  # Pick the first match
         else:
@@ -271,7 +267,7 @@ def process_tomograms():
 
     with open(tomolist_file, 'r') as f:
         tomo_numbers = [line.strip() for line in f if line.strip()]
-
+    
     print(f"Tomogram numbers: {tomo_numbers}")
     if not confirm_prompt("Is the list of tomograms correct?"):
         return
