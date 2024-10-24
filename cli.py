@@ -114,7 +114,7 @@ pytom_match_template.py \\
 
         if args.get('per_tilt_weighting'):
             f.write(f"--per-tilt-weighting \\\n")
-            f.write(f"--tomogram-ctf-model phase-flip \\\n")
+            f.write(f"--tomogram-ctf-model {args['tomogram_ctf_model']} \\\n")
 
         if args.get('non_spherical_mask'):
             f.write(f"--non-spherical-mask \\\n")
@@ -175,6 +175,23 @@ def get_pytom_flags():
 
     if confirm_prompt("Enable per-tilt-weighting?"):
         args['per_tilt_weighting'] = True
+
+        # Ask if the tomograms are CTF corrected
+        if confirm_prompt("Are the tomograms CTF corrected?"):
+            # If they are, set tomogram_ctf_model to 'none'
+            args['tomogram_ctf_model'] = 'none'
+        else:
+            # Ask if they want to apply the CTF filter (phase-flip)
+            tomogram_ctf_model = get_user_input("Do you want to apply the CTF filter? (press ENTER to accept default 'phase-flip')", "phase-flip")
+            # Validate the input
+            if tomogram_ctf_model.lower() in ['phase-flip', 'wiener']:
+                args['tomogram_ctf_model'] = tomogram_ctf_model.lower()
+            else:
+                print("Invalid input. Defaulting to 'phase-flip'.")
+                args['tomogram_ctf_model'] = 'phase-flip'
+    else:
+        # Default tomogram_ctf_model to 'none' if per-tilt-weighting is not enabled
+        args['tomogram_ctf_model'] = 'none'
 
     if confirm_prompt("Enable non-spherical mask?"):
         args['non_spherical_mask'] = True
