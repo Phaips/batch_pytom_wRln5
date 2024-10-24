@@ -249,20 +249,15 @@ def get_slurm_settings():
 
     return slurm_args
 
-def find_files_matching_tomo_num(directory, tomo_num, extension):
+def find_files_with_exact_number(directory, tomo_num, extension):
+    pattern = re.compile(rf'.*[^0-9]{tomo_num}\.{extension}$|^{tomo_num}\.{extension}$')
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
-    matched_files = []
-    for f in files:
-        filename = os.path.splitext(os.path.basename(f))[0]
-        if filename == tomo_num:
-            matched_files.append(f)
-        elif filename.endswith('_' + tomo_num):
-            matched_files.append(f)
+    matched_files = [f for f in files if pattern.search(os.path.basename(f))]
     return matched_files
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
-    star_files = find_files_matching_tomo_num(star_dir, tomo_num, 'star')
-    mrc_files = find_files_matching_tomo_num(mrc_dir, tomo_num, 'mrc')
+    star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
+    mrc_files = find_files_with_exact_number(mrc_dir, tomo_num, 'mrc')
 
     if not star_files or not mrc_files:
         raise FileNotFoundError(f"Could not find matching .star or .mrc file for tomogram {tomo_num}")
@@ -272,7 +267,7 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     
     bmask_file = None
     if use_tomogram_mask and bmask_dir:
-        bmask_files = find_files_matching_tomo_num(bmask_dir, tomo_num, 'mrc')
+        bmask_files = find_files_with_exact_number(bmask_dir, tomo_num, 'mrc')
         if bmask_files:
             bmask_file = bmask_files[0]  # Pick the first match
         else:
