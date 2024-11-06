@@ -139,7 +139,7 @@ def get_pytom_flags():
     print("\n--- Pytom Parameters ---")
     # Required parameters
     while True:
-        args['template'] = get_user_input("Enter the template file path (Required):")
+        args['template'] = get_user_input("Enter the template file path (Required - black on white density (inverted)):")
         if args['template'] and os.path.isfile(args['template']):
             break
         else:
@@ -153,15 +153,15 @@ def get_pytom_flags():
             print("Mask file is required and must exist.")
 
     # Particle diameter or angular search
-    args['particle_diameter'] = get_user_input("Enter particle diameter in Angstrom (Required if not specifying angular search):")
+    args['particle_diameter'] = get_user_input("Enter particle diameter in Angstrom to estimate angular sampling based on the Crowther criterion. (Required - press ENTER to specify custom angular search value):")
     if not args['particle_diameter']:
-        args['angular_search'] = get_user_input("Enter angular search value or file path (Required if particle diameter not specified):")
+        args['angular_search'] = get_user_input("Enter angular search value (Required if particle diameter not specified):")
         while not args['angular_search']:
             print("You must specify either particle diameter or angular search.")
             args['angular_search'] = get_user_input("Enter angular search value or file path (Required):")
 
     # Volume split parameters
-    args['volume_split'] = get_user_input("Enter volume split parameters as 'x y z' (e.g., 2 2 1) or leave empty to skip:")
+    args['volume_split'] = get_user_input("Enter volume split parameters as 'x y z' (e.g., 2 2 1) or press ENTER empty to skip:")
     if args['volume_split']:
         # Validate the input
         if not re.match(r'^\d+\s+\d+\s+\d+$', args['volume_split']):
@@ -171,7 +171,7 @@ def get_pytom_flags():
     args['voxel_size_angstrom'] = get_user_input("Enter voxel size in Angstrom (Required):")
     args['gpu_ids'] = get_user_input("Enter GPU IDs (Required):")
 
-    if confirm_prompt("Enable random-phase correction? (recommended)"):
+    if confirm_prompt("Enable random-phase correction? (Recommended)"):
         args['random_phase_correction'] = True
         args['rng_seed'] = get_user_input("Enter random seed (default: 69):", "69")
 
@@ -215,7 +215,7 @@ def get_pytom_flags():
 
 def get_slurm_settings():
     slurm_defaults = {
-        'partition': 'rtx4090',   # Updated default partition
+        'partition': 'rtx4090-em',   # Updated default partition
         'ntasks': '1',
         'nodes': '1',
         'ntasks_per_node': '1',
@@ -223,7 +223,7 @@ def get_slurm_settings():
         'gres': 'gpu:1',
         'mail_type': 'none',
         'mem': '128',
-        'qos': 'gpu6hours',       # Updated default QoS
+        'qos': 'emgpu',       # Updated default QoS
         'time': '06:00:00'
     }
 
