@@ -309,7 +309,7 @@ def process_tomograms():
         print(f".star File: {star_file}")
         print(f".mrc File: {tomogram_file}")
         print(f"Bmask File: {bmask_file}")
-        if not confirm_prompt("Are these values correct for the first tomogram in your tomolist?"):
+        if not confirm_prompt("Are these values correct for the first tomogram from your tomolist?"):
             return
     except Exception as e:
         print(f"Error during sanity check: {e}")
