@@ -276,7 +276,7 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     return star_files[0], mrc_files[0], bmask_file
 
 def process_tomograms():
-    tomolist_file = get_user_input("Enter the path to the tomolist file")
+    tomolist_file = get_user_input("Enter the path to the tomolist (a text file containing all the tomo numbers you want to run template matching on e.g. 1 for Tomo_1.mrc)")
     if not tomolist_file or not os.path.isfile(tomolist_file):
         print("Tomolist file is required and must exist.")
         return
@@ -288,13 +288,13 @@ def process_tomograms():
     if not confirm_prompt("Is the list of tomograms correct?"):
         return
 
-    star_dir = get_user_input("Enter the directory path for .star files")
-    mrc_dir = get_user_input("Enter the directory path for .mrc files")
+    star_dir = get_user_input("Enter the directory path for .star files (tiltseries folder from RELION5)")
+    mrc_dir = get_user_input("Enter the directory path for .mrc files (tomograms folder from RELION5)")
 
     use_tomogram_mask = confirm_prompt("Do you want to use tomogram masks?")
     bmask_dir = None
     if use_tomogram_mask:
-        bmask_dir = get_user_input("Enter the directory for tomogram masks (e.g., path/to/bmask_[tomonumber].mrc):")
+        bmask_dir = get_user_input("Enter the directory for tomogram masks (e.g., path/to/bmask which contains filename_[tomonumber].mrc):")
 
     # Validate the first tomogram for sanity check
     first_tomo_num = tomo_numbers[0]
@@ -309,7 +309,7 @@ def process_tomograms():
         print(f".star File: {star_file}")
         print(f".mrc File: {tomogram_file}")
         print(f"Bmask File: {bmask_file}")
-        if not confirm_prompt("Are these values correct for the first tomogram?"):
+        if not confirm_prompt("Are these values correct for the first tomogram in your tomolist?"):
             return
     except Exception as e:
         print(f"Error during sanity check: {e}")
