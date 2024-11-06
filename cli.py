@@ -294,7 +294,7 @@ def process_tomograms():
     use_tomogram_mask = confirm_prompt("Do you want to use tomogram masks?")
     bmask_dir = None
     if use_tomogram_mask:
-        bmask_dir = get_user_input("Enter the directory for tomogram masks (e.g., path/to/bmask_*.mrc):")
+        bmask_dir = get_user_input("Enter the directory for tomogram masks (e.g., path/to/bmask_[tomonumber].mrc):")
 
     # Validate the first tomogram for sanity check
     first_tomo_num = tomo_numbers[0]
