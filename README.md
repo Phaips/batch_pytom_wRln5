@@ -25,13 +25,6 @@ Ensure you have the required libraries installed:
 pip install starfile prompt_toolkit os glob subprocess re
 ```
 
-## Usage
-
-To execute the script, use:
-```bash
-python cli.py
-```
-
 ### Example Workflow
 
 1. **Starting the Script**
