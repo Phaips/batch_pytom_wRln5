@@ -22,7 +22,7 @@ This script facilitates the batch submission of [pytom-match-pick](https://githu
 
 Ensure you have the required libraries installed:
 ```bash
-pip install starfile prompt_toolkit
+pip install starfile prompt_toolkit os glob subprocess re
 ```
 
 ## Usage
