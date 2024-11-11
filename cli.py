@@ -250,9 +250,9 @@ def get_slurm_settings():
     return slurm_args
 
 def find_files_with_exact_number(directory, tomo_num, extension):
-    pattern = re.compile(rf'(^|[^0-9]){tomo_num}\.{extension}$')
+    pattern = re.compile(rf'.*{re.escape(tomo_num)}\.{extension}$')
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
-    matched_files = [f for f in files if pattern.search(os.path.basename(f))]
+    matched_files = [f for f in files if pattern.match(os.path.basename(f))]
     return matched_files
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
@@ -287,16 +287,17 @@ def process_tomograms():
         tomo_numbers = []
         for mrc_file in mrc_files:
             filename = os.path.basename(mrc_file)
-            match = re.search(r'(\d+)', filename)
+            base_name = os.path.splitext(filename)[0]
+            match = re.search(r'\d+(_\d+)*$', base_name)
             if match:
-                tomo_num = match.group(1)
+                tomo_num = match.group(0)
                 tomo_numbers.append(tomo_num)
         tomo_numbers = list(set(tomo_numbers))
         print(f"Found tomograms: {tomo_numbers}")
         if not confirm_prompt("Is the list of tomograms correct?"):
             return
     else:
-        tomolist_file = get_user_input("Enter the path to the tomolist (a text file containing all the tomo numbers you want to run template matching on e.g. 1 for Tomo_1.mrc)")
+        tomolist_file = get_user_input("Enter the path to the tomolist (a text file containing all the tomo numbers you want to run template matching on e.g. 1 or 1_2 for Tomo_1.mrc. Tomo1.mrc or Tomo_1_2.mrc)")
         if not tomolist_file or not os.path.isfile(tomolist_file):
             print("Tomolist file is required and must exist.")
             return
