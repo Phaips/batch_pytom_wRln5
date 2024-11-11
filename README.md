@@ -1,7 +1,7 @@
 
 # Batch Submission of `pytom-match-pick` Jobs
 
-This script facilitates the batch submission of [pytom-match-pick](https://github.com/SBC-Utrecht/pytom-match-pick) jobs on a high-performance computing (HPC) cluster using SLURM. It reads a list of tomogram numbers from a text file (a "tomolist") and uses those tomogram numbers to run template matching. The script guides you through input prompts to configure necessary parameters and generate corresponding SLURM submission scripts.
+This script facilitates the batch submission of [pytom-match-pick](https://github.com/SBC-Utrecht/pytom-match-pick) jobs on a high-performance computing (HPC) cluster using SLURM. It reads [RELION5](https://github.com/3dem/relion/tree/ver5.0) reconstruction metadata for template matching. The script guides you through input prompts to configure necessary parameters and generate corresponding SLURM submission scripts.
 
 ## Features
 
