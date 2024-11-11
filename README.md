@@ -41,9 +41,9 @@ pip install starfile prompt_toolkit os glob subprocess re
    Tomogram numbers: ['1', '2', '6', '8', '9', '10', '13', '15', '17']
    Is the list of tomograms correct? ([y]es/[n]o): y
 
-   Enter the directory path for RELION5 `.star` files []: ../Tomograms/No_halfset_tomo_aretomo/tilt_series
+   Enter the directory path for RELION5 `.star` files []: ../tilt_series
 
-   Enter the directory path for RELION5 tomogram files (.mrc) []: ../Tomograms/No_halfset_tomo_aretomo/tomograms
+   Enter the directory path for RELION5 tomogram files (.mrc) []: ../tomograms
 
    Do you want to use tomogram masks? ([y]es/[n]o): y
 
@@ -54,8 +54,8 @@ pip install starfile prompt_toolkit os glob subprocess re
    *Tilt values: [-40.01, 57.99]*
    *Defocus values: [1.36, 2.03]*
    *Exposure values: [100.0, 96.0]*
-   *.star File: ../Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star*
-   *.mrc File: ../Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc*
+   *.star File: ../tilt_series/Position_1.star*
+   *.mrc File: ../tomograms/rec_Position_1.mrc*
 
    Are these values correct for the first tomogram? ([y]es/[n]o): y
 
