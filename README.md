@@ -1,102 +1,157 @@
+
 # Batch Submission of `pytom-match-pick` Jobs
 
-This script allows for the batch submission of `pytom-match-pick` jobs using a tomolist—a text file containing each tomogram number you want to run template matching on (one tomogram number per line). The script will guide you through input prompts to configure the necessary parameters for running `pytom` jobs and generating corresponding SLURM submission scripts for a high-performance computing (HPC) cluster.
+This script facilitates the batch submission of `pytom-match-pick` jobs on a high-performance computing (HPC) cluster using SLURM. It reads a list of tomogram numbers from a text file (a "tomolist") and uses those tomogram numbers to run template matching. The script guides you through input prompts to configure necessary parameters and generate corresponding SLURM submission scripts.
+
+## Features
+
+- Automated SLURM job script generation for each tomogram
+- Interactive prompts to gather all necessary input paths and parameters
+- Sanity check for tilt, defocus, and exposure values on the first tomogram
+- Optional tomogram mask usage for template matching
+- Parameter validation and SLURM submission tracking
 
 ## Requirements
 
 - Python 3.x
 - `starfile` library for reading `.star` files
-- `prompt_toolkit` for interactive user inputs
+- `prompt_toolkit` for interactive prompts
 - Access to SLURM for job submission
+
+## Installation
+
+Ensure you have the required libraries installed:
+```bash
+pip install starfile prompt_toolkit
+```
 
 ## Usage
 
-Run the script:
-
+To execute the script, use:
 ```bash
 python cli.py
-````
+```
 
-## Example
+### Example Workflow
 
-````
-> python cli.py
+1. **Starting the Script**
+   ```bash
+   python cli.py
+   ```
 
-Enter the path to the tomolist file []: **tomolist.txt**
+2. **Following the Prompts**
 
-Tomogram numbers: ['1', '2', '6', '8', '9', '10', '13', '15', '17']
+   Example session:
+   ```text
+   Enter the path to the tomolist file []: tomolist.txt
 
-Is the list of tomograms correct? ([y]es/[n]o): **y**
+   Tomogram numbers: ['1', '2', '6', '8', '9', '10', '13', '15', '17']
+   Is the list of tomograms correct? ([y]es/[n]o): y
 
-Enter the directory path for RELION5 `.star` files []: **../Tomograms/No_halfset_tomo_aretomo/tilt_series**
+   Enter the directory path for RELION5 `.star` files []: ../Tomograms/No_halfset_tomo_aretomo/tilt_series
 
-Enter the directory path for RELION5 tomogram files (.mrc) []: **../Tomograms/No_halfset_tomo_aretomo/tomograms**
+   Enter the directory path for RELION5 tomogram files (.mrc) []: ../Tomograms/No_halfset_tomo_aretomo/tomograms
 
-Do you want to use tomogram masks? ([y]es/[n]o): **y**
+   Do you want to use tomogram masks? ([y]es/[n]o): y
 
-Enter the directory for tomogram masks (e.g., path/to/bmask_*.mrc): []: **../bmask**
+   Enter the directory for tomogram masks (e.g., path/to/bmask_*.mrc): ../bmask
 
-*Sanity Check for your First Tomogram checking Min and Max values*
+   *Sanity Check for your First Tomogram checking Min and Max values*
 
-*Tilt values: [-40.01, 57.99]*
+   *Tilt values: [-40.01, 57.99]*
+   *Defocus values: [1.36, 2.03]*
+   *Exposure values: [100.0, 96.0]*
+   *.star File: ../Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star*
+   *.mrc File: ../Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc*
 
-*Defocus values: [1.36, 2.03]*
+   Are these values correct for the first tomogram? ([y]es/[n]o): y
 
-*Exposure values: [100.0, 96.0]*
+   --- Pytom Parameters ---
 
-*.star File: ../Tomograms/No_halfset_tomo_aretomo/tilt_series/Position_1.star*
+   Enter the template file path (Required): tmpl.mrc
 
-*.mrc File: ../Tomograms/No_halfset_tomo_aretomo/tomograms/rec_Position_1.mrc*
+   Enter the mask file path (Required): mask.mrc
 
-Are these values correct for the first tomogram? ([y]es/[n]o): **y**
+   Enter particle diameter in Angstrom (Required if not specifying angular search): 140
 
---- Pytom Parameters ---
+   Enter voxel size in Angstrom (Required): 7.92
 
-Enter the template file path (Required): []: **tmpl.mrc**
+   Enter GPU IDs (Required): 0
 
-Enter the mask file path (Required): []: **mask.mrc**
+   Enable random-phase correction? (recommended) ([y]es/[n]o): y
 
-Enter particle diameter in Angstrom (Required if not specifying angular search): []: **140**
+   Enter random seed (default: 69): 69
 
-Enter voxel size in Angstrom (Required): []: **7.92**
+   Enable per-tilt-weighting? ([y]es/[n]o): y
 
-Enter GPU IDs (Required): []: **0**
+   Enable non-spherical mask? ([y]es/[n]o): n
 
-Enable random-phase correction? (recommended) ([y]es/[n]o): **y**
+   Enable spectral whitening? ([y]es/[n]o): n
 
-Enter random seed (default: 69): [69]: **69**
+   Enter z-axis rotational symmetry as integer (PRESS ENTER TO SKIP): 4
 
-Enable per-tilt-weighting? ([y]es/[n]o): **y**
+   Amplitude contrast (ENTER = default: 0.07): 0.07
 
-Enable non-spherical mask? ([y]es/[n]o): **n**
+   Spherical aberration in mm (ENTER = default: 2.7): 2.7
 
-Enable spectral whitening? ([y]es/[n]o): **n**
+   Acceleration voltage in kV (ENTER = default: 300): 300
 
-Enter z-axis rotational symmetry as integer (PRESS ENTER TO SKIP): []: **4**
+   Low-pass filter (PRESS ENTER TO SKIP): 
 
-Amplitude contrast (ENTER = default: 0.07): [0.07]: **0.07**
+   High-pass filter (PRESS ENTER TO SKIP): 
 
-Spherical aberration in mm (ENTER = default: 2.7): [2.7]: **2.7**
+   --- SLURM Settings ---
 
-Acceleration voltage in kV (ENTER = default: 300): [300]: **300**
+   Default SLURM settings are:
+   - partition: rtx4090-em
+   - ntasks: 1
+   - nodes: 1
+   - ntasks_per_node: 1
+   - cpus_per_task: 4
+   - gres: gpu:1
+   - mail_type: none
+   - mem: 128
+   - qos: emgpu
+   - time: 06:00:00
 
-Low-pass filter (PRESS ENTER TO SKIP): []:
+   Do you want to use the default SLURM settings? ([y]es/[n]o): y
+   ```
 
-High-pass filter (PRESS ENTER TO SKIP): []:
+## Parameter Details
 
---- SLURM Settings ---
+### Script Parameters
 
-Default SLURM settings are:
+| Parameter | Description |
+| --------- | ----------- |
+| **Template File** | Path to the template file (required). |
+| **Mask File** | Path to the mask file (required). |
+| **Particle Diameter** | Particle diameter in Angstroms. If not specified, angular search value is required. |
+| **Voxel Size** | Voxel size in Angstroms (required). |
+| **GPU IDs** | IDs of GPUs to use (required). |
+| **Random-Phase Correction** | Enable random-phase correction (recommended). |
+| **Per-Tilt Weighting** | Enable weighting per tilt. |
+| **Non-Spherical Mask** | Enable non-spherical mask usage. |
+| **Spectral Whitening** | Enable spectral whitening of data. |
+| **Z-Axis Rotational Symmetry** | Z-axis rotational symmetry as an integer. |
+| **Amplitude Contrast** | Amplitude contrast (default: 0.07). |
+| **Spherical Aberration** | Spherical aberration in mm (default: 2.7). |
+| **Acceleration Voltage** | Acceleration voltage in kV (default: 300). |
+| **Low-Pass Filter** | Optional low-pass filter. |
+| **High-Pass Filter** | Optional high-pass filter. |
 
-- partition: rtx4090
-- ntasks: 1
-- nodes: 1
-- ntasks_per_node: 1
-- cpus_per_task: 4
-- gres: gpu:1
-- mail_type: none
-- mem: 128
-- qos: gpu6hours
-- time: 06:00:00
+### SLURM Parameters
 
-Do you want to use the default SLURM settings? ([y]es/[n]o): **y**
+| Parameter | Default Value | Description |
+| --------- | ------------- | ----------- |
+| **partition** | rtx4090-em | SLURM partition. |
+| **ntasks** | 1 | Number of tasks. |
+| **nodes** | 1 | Number of nodes. |
+| **ntasks_per_node** | 1 | Tasks per node. |
+| **cpus_per_task** | 4 | CPUs per task. |
+| **gres** | gpu:1 | GPU resources. |
+| **mail_type** | none | Email notification type. |
+| **mem** | 128 | Memory allocation in GB. |
+| **qos** | emgpu | Quality of Service. |
+| **time** | 06:00:00 | Time limit for the job. |
+
+Once all parameters are set, the script will generate and submit SLURM scripts for each tomogram in the list.
