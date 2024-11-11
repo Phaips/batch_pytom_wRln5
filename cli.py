@@ -236,7 +236,7 @@ def get_slurm_settings():
         return slurm_defaults
 
     slurm_args = {}
-    slurm_args['partition'] = get_user_input("SLURM partition (default: rtx4090):", slurm_defaults['partition'])
+    slurm_args['partition'] = get_user_input("SLURM partition (default: rtx4090-em):", slurm_defaults['partition'])
     slurm_args['ntasks'] = get_user_input("Number of tasks (default: 1):", slurm_defaults['ntasks'])
     slurm_args['nodes'] = get_user_input("Number of nodes (default: 1):", slurm_defaults['nodes'])
     slurm_args['ntasks_per_node'] = get_user_input("Tasks per node (default: 1):", slurm_defaults['ntasks_per_node'])
@@ -244,13 +244,13 @@ def get_slurm_settings():
     slurm_args['gres'] = get_user_input("GPU resources (default: gpu:1):", slurm_defaults['gres'])
     slurm_args['mail_type'] = get_user_input("Mail type for SLURM (default: none):", slurm_defaults['mail_type'])
     slurm_args['mem'] = get_user_input("Memory allocation in GB (default: 128):", slurm_defaults['mem'])
-    slurm_args['qos'] = get_user_input("QoS for SLURM (default: gpu6hours):", slurm_defaults['qos'])
+    slurm_args['qos'] = get_user_input("QoS for SLURM (default: emgpu):", slurm_defaults['qos'])
     slurm_args['time'] = get_user_input("Time limit (default: 06:00:00):", slurm_defaults['time'])
 
     return slurm_args
 
 def find_files_with_exact_number(directory, tomo_num, extension):
-    pattern = re.compile(rf'.*[^0-9]{tomo_num}\.{extension}$|^{tomo_num}\.{extension}$')
+    pattern = re.compile(rf'(^|[^0-9]){tomo_num}\.{extension}$')
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
     matched_files = [f for f in files if pattern.search(os.path.basename(f))]
     return matched_files
@@ -276,20 +276,41 @@ def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogra
     return star_files[0], mrc_files[0], bmask_file
 
 def process_tomograms():
-    tomolist_file = get_user_input("Enter the path to the tomolist (a text file containing all the tomo numbers you want to run template matching on e.g. 1 for Tomo_1.mrc)")
-    if not tomolist_file or not os.path.isfile(tomolist_file):
-        print("Tomolist file is required and must exist.")
-        return
+    print("\n--- Tomogram Selection ---")
+    if confirm_prompt("Do you want to use all .mrc files in the tomogram directory?"):
+        mrc_dir = get_user_input("Enter the directory path for .mrc files (tomograms folder from RELION5)")
+        mrc_files = glob.glob(os.path.join(mrc_dir, "*.mrc"))
+        if not mrc_files:
+            print("No .mrc files found in the specified directory.")
+            return
 
-    with open(tomolist_file, 'r') as f:
-        tomo_numbers = [line.strip() for line in f if line.strip()]
-    
-    print(f"Tomogram numbers: {tomo_numbers}")
-    if not confirm_prompt("Is the list of tomograms correct?"):
-        return
+        tomo_numbers = []
+        for mrc_file in mrc_files:
+            filename = os.path.basename(mrc_file)
+            match = re.search(r'(\d+)', filename)
+            if match:
+                tomo_num = match.group(1)
+                tomo_numbers.append(tomo_num)
+        tomo_numbers = list(set(tomo_numbers))
+        print(f"Found tomograms: {tomo_numbers}")
+        if not confirm_prompt("Is the list of tomograms correct?"):
+            return
+    else:
+        tomolist_file = get_user_input("Enter the path to the tomolist (a text file containing all the tomo numbers you want to run template matching on e.g. 1 for Tomo_1.mrc)")
+        if not tomolist_file or not os.path.isfile(tomolist_file):
+            print("Tomolist file is required and must exist.")
+            return
+
+        with open(tomolist_file, 'r') as f:
+            tomo_numbers = [line.strip() for line in f if line.strip()]
+        
+        print(f"Tomogram numbers: {tomo_numbers}")
+        if not confirm_prompt("Is the list of tomograms correct?"):
+            return
+
+        mrc_dir = get_user_input("Enter the directory path for .mrc files (tomograms folder from RELION5)")
 
     star_dir = get_user_input("Enter the directory path for .star files (tiltseries folder from RELION5)")
-    mrc_dir = get_user_input("Enter the directory path for .mrc files (tomograms folder from RELION5)")
 
     use_tomogram_mask = confirm_prompt("Do you want to use tomogram masks?")
     bmask_dir = None
@@ -309,7 +330,7 @@ def process_tomograms():
         print(f".star File: {star_file}")
         print(f".mrc File: {tomogram_file}")
         print(f"Bmask File: {bmask_file}")
-        if not confirm_prompt("Are these values correct for the first tomogram from your tomolist?"):
+        if not confirm_prompt("Are these values correct for the first tomogram from your list?"):
             return
     except Exception as e:
         print(f"Error during sanity check: {e}")
