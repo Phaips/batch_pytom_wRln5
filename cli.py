@@ -215,7 +215,7 @@ def get_pytom_flags():
 
 def get_slurm_settings():
     slurm_defaults = {
-        'partition': 'rtx4090-em',   # Updated default partition
+        'partition': 'emgpu',   # Updated default partition
         'ntasks': '1',
         'nodes': '1',
         'ntasks_per_node': '1',
