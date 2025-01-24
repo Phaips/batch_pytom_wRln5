@@ -250,10 +250,11 @@ def get_slurm_settings():
     return slurm_args
 
 def find_files_with_exact_number(directory, tomo_num, extension):
-    pattern = re.compile(rf'.*{re.escape(tomo_num)}\.{extension}$')
+    pattern = re.compile(rf'^(.*_)?{re.escape(tomo_num)}\.{extension}$')
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
     matched_files = [f for f in files if pattern.match(os.path.basename(f))]
     return matched_files
+
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
     star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
