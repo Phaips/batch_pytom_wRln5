@@ -249,7 +249,7 @@ def get_slurm_settings():
 
     return slurm_args
 
-def find_files_with_exact_number(directory, tomo_num, extension):
+def find_files_with_exact_number(directory, tomo_num, extension): # Pattern match tomo_7 vs. tomo_17 for example
     pattern = re.compile(rf'^(.*_)?{re.escape(tomo_num)}\.{extension}$')
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
     matched_files = [f for f in files if pattern.match(os.path.basename(f))]
