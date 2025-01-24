@@ -249,10 +249,17 @@ def get_slurm_settings():
 
     return slurm_args
 
-def find_files_with_exact_number(directory, tomo_num, extension): # Pattern match tomo_7 vs. tomo_17 for example
-    pattern = re.compile(rf'^(.*_)?{re.escape(tomo_num)}\.{extension}$')
+def find_files_with_exact_number(directory, tomo_num, extension):
+    # Primary match: Filenames with underscore (e.g., tomo_7.mrc)
+    underscore_pattern = re.compile(rf'.*_{re.escape(tomo_num)}\.{extension}$')
     files = glob.glob(os.path.join(directory, f"*.{extension}"))
-    matched_files = [f for f in files if pattern.match(os.path.basename(f))]
+    matched_files = [f for f in files if underscore_pattern.match(os.path.basename(f))]
+    
+    # If no files are matched with underscores, fall back to matching without underscores
+    if not matched_files:
+        no_underscore_pattern = re.compile(rf'.*{re.escape(tomo_num)}\.{extension}$')
+        matched_files = [f for f in files if no_underscore_pattern.match(os.path.basename(f))]
+    
     return matched_files
 
 
