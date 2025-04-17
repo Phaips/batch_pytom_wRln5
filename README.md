@@ -51,7 +51,7 @@ Submitted submission/tomo_3/submit_3.sh: Submitted batch job 41548312
 ... (and so on for each tomogram)
 ```
 
-#### Example generated SLURM submission script
+#### Example of one of the generated submission script
 
 ```bash
 #!/bin/bash -l
