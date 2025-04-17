@@ -226,7 +226,7 @@ def get_slurm_settings():
         'mail_type': 'none',
         'mem': '128',
         'qos': 'emgpu',       # Updated default QoS
-        'time': '06:00:00'
+        'time': '05:00:00'
     }
 
     print("\n--- SLURM Settings ---")
@@ -251,23 +251,36 @@ def get_slurm_settings():
 
     return slurm_args
 
-def find_files_with_exact_number(directory, tomo_num, extension):
-    # Primary match: Filenames with underscores
-    if "_" in tomo_num:  # Handle compound numbers like "3_2"
-        pattern = re.compile(rf'.*_{re.escape(tomo_num)}(_.*)?\.{extension}$')
-    else:  # Handle simple numbers like "3"
-        pattern = re.compile(rf'.*_{re.escape(tomo_num)}(_|\.{extension}$)')
-    
-    files = glob.glob(os.path.join(directory, f"*.{extension}"))
-    matched_files = [f for f in files if pattern.match(os.path.basename(f))]
-    
-    # If no matches found, fall back to filenames without underscores
-    if not matched_files:
-        fallback_pattern = re.compile(rf'.*{re.escape(tomo_num)}(?=\.{extension}$)')
-        matched_files = [f for f in files if fallback_pattern.match(os.path.basename(f))]
-    
-    return matched_files
+#
+# NEW HELPER: parse the ID from a file that starts with either Position_ or rec_Position_
+#
+def parse_id_from_filename(filename):
+    """Parses the numeric ID portion (e.g. 7, 7_2, 1034_2) from the filename,
+    removing recognized prefixes like 'Position_' or 'rec_Position_'.
+    Example: rec_Position_7_2.mrc -> '7_2'; Position_1034.star -> '1034'.
+    """
+    base, _ = os.path.splitext(filename)
+    for prefix in ['rec_Position_', 'Position_']:
+        if base.startswith(prefix):
+            return base[len(prefix):]
+    return base  # fallback if neither prefix is found
 
+#
+# REPLACED function find_files_with_exact_number
+#
+def find_files_with_exact_number(directory, tomo_num, extension):
+    """
+    This function now finds filenames that parse to exactly 'tomo_num' when
+    removing the recognized prefix. For example, if tomo_num='7_2', it will
+    match 'rec_Position_7_2.mrc' or 'Position_7_2.star' but NOT 'Position_7.star'.
+    """
+    files = glob.glob(os.path.join(directory, f"*.{extension}"))
+    matched_files = []
+    for f in files:
+        parsed_id = parse_id_from_filename(os.path.basename(f))
+        if parsed_id == tomo_num:
+            matched_files.append(f)
+    return matched_files
 
 def find_matching_files(tomo_num, star_dir, mrc_dir, bmask_dir=None, use_tomogram_mask=False):
     star_files = find_files_with_exact_number(star_dir, tomo_num, 'star')
@@ -301,12 +314,12 @@ def process_tomograms():
         tomo_numbers = []
         for mrc_file in mrc_files:
             filename = os.path.basename(mrc_file)
-            base_name = os.path.splitext(filename)[0]
-            match = re.search(r'\d+(_\d+)*$', base_name)
-            if match:
-                tomo_num = match.group(0)
-                tomo_numbers.append(tomo_num)
-        tomo_numbers = list(set(tomo_numbers))
+            # parse out the numeric ID after rec_Position_:
+            parsed_id = parse_id_from_filename(filename)
+            if parsed_id:  # e.g. '7', '7_2'
+                tomo_numbers.append(parsed_id)
+
+        tomo_numbers = list(set(tomo_numbers))  # unique
         print(f"Found tomograms: {tomo_numbers}")
         if not confirm_prompt("Is the list of tomograms correct?"):
             return
