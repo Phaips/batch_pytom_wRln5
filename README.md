@@ -12,7 +12,7 @@ This script automates the batch submission of [pytom-match-pick](https://github.
 Provide the RELION5 tomogram and `.star` directories plus the usual PyTom flags (template, mask, etc.), and the script will batch‑submit jobs:
 
 ```bash
-python cli.py \
+python batch_pytom.py \
   --mrc-dir /path/to/Tomograms/jobXXX/tomograms \
   --star-dir /path/to/Tomograms/jobXXX/ \
   -t /path/to/template.mrc \
@@ -98,10 +98,10 @@ pytom_match_template.py \
 
 ## Full help output
 
-Usage and options (run `python cli.py -h` to see defaults and descriptions):
+Usage and options (run `python batch_pytom.py -h` to see defaults and descriptions):
 
 ```
-usage: cli.py [-h] --mrc-dir MRC_DIR --star-dir STAR_DIR [--bmask-dir BMASK_DIR] [--tomolist TOMOLIST]
+usage: batch_pytom.py [-h] --mrc-dir MRC_DIR --star-dir STAR_DIR [--bmask-dir BMASK_DIR] [--tomolist TOMOLIST]
               [--output-dir OUTPUT_DIR] [--dry-run] [--no-tomogram-mask] [--validate-only]
               -t TEMPLATE -m MASK [--particle-diameter PARTICLE_DIAMETER] [--angular-search ANGULAR_SEARCH]
               [-s X Y Z] --voxel-size VOXEL_SIZE [-g GPU_IDS [GPU_IDS ...]] [--random-phase-correction]
